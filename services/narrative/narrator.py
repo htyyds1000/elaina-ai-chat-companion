@@ -117,7 +117,7 @@ def role_params(
     """解析某一角色下的 provider/model/temperature/max_tokens。
 
     优先级：角色专属配置 → 角色子段（alter_system / schedule_preplan）→ 叙事全局默认
-    → 插件（AI 聊天陪伴）主配置 → 内置默认。
+    → 插件（AI 幕间剧场）主配置 → 内置默认。
     所有角色都走中央 ``ai_llm``，因此默认复用插件的 provider_id / model_preference。
     """
     narrative = narrative_config or {}
@@ -200,7 +200,7 @@ async def complete_text(
         model=params["model"],
         temperature=params["temperature"],
         max_tokens=params["max_tokens"],
-        consumer_plugin="ai_companion_narrative",
+        consumer_plugin="ai_interlude_narrative",
         enable_runtime_tools=False,
         prepare_context=False,
     )

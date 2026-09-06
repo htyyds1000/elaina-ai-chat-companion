@@ -1,4 +1,4 @@
-"""AI 陪伴 Web 面板 API。"""
+"""AI 幕间剧场 Web 面板 API。"""
 
 from __future__ import annotations
 
@@ -14,7 +14,7 @@ from ..services import central, config, skills
 from ..storage import narrative_store
 from ..storage import repository as store
 
-PREFIX = "/api/ext/ai-companion"
+PREFIX = "/api/ext/ai-interlude"
 _registered = False
 _RESOURCE_MEDIA = {
     "image": {".png", ".jpg", ".jpeg", ".webp", ".gif"},
@@ -373,7 +373,7 @@ async def _model_tools(_request: web.Request) -> web.Response:
     enabled = set(current.get("enabled_model_tools", []))
     service = central.get_service()
     catalog = (
-        service.model_tool_catalog(consumer_plugin="ai_companion")
+        service.model_tool_catalog(consumer_plugin="ai_interlude")
         if service is not None and hasattr(service, "model_tool_catalog")
         else []
     )

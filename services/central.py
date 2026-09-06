@@ -96,7 +96,7 @@ def _register_on(service) -> list[dict]:
         if handler is not None:
             result.append(
                 service.register_plugin_capability(
-                    "ai_companion",
+                    "ai_interlude",
                     kind,
                     value,
                     handler,
@@ -105,7 +105,7 @@ def _register_on(service) -> list[dict]:
         else:
             result.append(
                 service.register_plugin_capability(
-                    "ai_companion",
+                    "ai_interlude",
                     kind,
                     value,
                 )
@@ -122,7 +122,7 @@ def unregister_capabilities() -> None:
     global _registered_service
     service = _registered_service or _raw_service()
     if service is not None and hasattr(service, "unregister_plugin_capabilities"):
-        service.unregister_plugin_capabilities("ai_companion")
+        service.unregister_plugin_capabilities("ai_interlude")
     _registered_service = None
 
 
@@ -331,7 +331,7 @@ def _tools(
         result.extend(
             service.model_tool_definitions(
                 config.get("enabled_model_tools", []),
-                consumer_plugin="ai_companion",
+                consumer_plugin="ai_interlude",
                 context=media_context,
             )
         )
@@ -393,7 +393,7 @@ async def _moderate_text(config: dict, text: str, source: str) -> dict:
             model=model,
             temperature=0,
             max_tokens=24,
-            consumer_plugin="ai_companion_review",
+            consumer_plugin="ai_interlude_review",
             enable_runtime_tools=False,
             prepare_context=False,
         )
@@ -446,7 +446,7 @@ async def complete(
             return await service.call_model_tool(
                 name,
                 arguments,
-                consumer_plugin="ai_companion",
+                consumer_plugin="ai_interlude",
                 context=media_context,
             )
         if name == "read_companion_resource":
@@ -516,7 +516,7 @@ async def complete(
         tools=tools or None,
         tool_handler=handle_tool if tools else None,
         max_tool_rounds=config.get("network_tool_rounds", 3),
-        consumer_plugin="ai_companion",
+        consumer_plugin="ai_interlude",
         enable_runtime_tools=False,
         prepare_context=False,
     )

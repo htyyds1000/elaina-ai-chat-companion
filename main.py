@@ -1,4 +1,4 @@
-"""AI 聊天陪伴：多人格、中央 LLM、按用户隔离的上下文与 Web 面板。"""
+"""AI 幕间剧场：多人格、中央 LLM、按用户隔离的上下文与 Web 面板。"""
 
 from __future__ import annotations
 
@@ -20,18 +20,18 @@ from .storage import repository as store
 from .web import routes as webpanel
 
 __plugin_meta__ = {
-    "name": "AI 聊天陪伴",
+    "name": "AI 幕间剧场",
     "author": "ElainaBot",
-    "description": "支持多人格、中央 LLM、全入口用户独立上下文与 Web 面板",
+    "description": "基于 HDS Interlude 的持续叙事陪伴：多人格、中央 LLM、用户独立上下文、情绪偏移与行动窗口",
     "version": "2.0.1",
     "github": "https://github.com/htyyds1000/elaina-ai-chat-companion",
     "license": "MIT",
 }
 
-log = get_logger(PLUGIN, "AI聊天陪伴")
+log = get_logger(PLUGIN, "AI幕间剧场")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, "data")
-PAGE_KEY = "ai-companion"
+PAGE_KEY = "ai-interlude"
 MESSAGE_EVENTS = [
     "GROUP_AT_MESSAGE_CREATE",
     "GROUP_MESSAGE_CREATE",
@@ -297,19 +297,19 @@ async def initialize() -> None:
     webpanel.register_routes()
     register_page(
         key=PAGE_KEY,
-        label="AI 陪伴",
+        label="AI 幕间剧场",
         source="plugin",
-        source_name="AI聊天陪伴",
+        source_name="AI幕间剧场",
         icon=_ICON,
         html_file=os.path.join(BASE_DIR, "assets", "panel.html"),
     )
     injected = central.register_capabilities()
     if injected:
-        log.info("已向中央 AI LLM 注入 %s 个 AI 陪伴能力", len(injected))
+        log.info("已向中央 AI LLM 注入 %s 个 AI 幕间剧场能力", len(injected))
     if _capability_task is None or _capability_task.done():
         _capability_task = asyncio.create_task(_watch_ai_service())
     narrative_engine.start_background()
-    log.info("AI 聊天陪伴插件已加载")
+    log.info("AI 幕间剧场插件已加载")
 
 
 @on_unload
@@ -337,9 +337,9 @@ async def _watch_ai_service() -> None:
 
 
 @handler(
-    r"^/(?:ai|陪伴)\s*$",
-    name="AI 陪伴帮助",
-    desc="查看 AI 陪伴命令",
+    r"^/(?:剧场|theater)\s*$",
+    name="AI 幕间剧场帮助",
+    desc="查看 AI 幕间剧场命令",
     priority=40,
     event_types=MESSAGE_EVENTS,
     ignore_at_check=True,
@@ -353,14 +353,14 @@ async def help_command(event, _match) -> None:
     )
     await _reply_to_user(
         event,
-        "【AI 聊天陪伴】\n"
+        "【AI 幕间剧场】\n"
         "直接 @我 或私聊即可对话\n"
         "全量群聊可按面板设置的概率自动参与对话\n"
-        "/ai clear - 清空当前会话\n"
-        "/ai personality <ID> - 切换人格\n"
-        "/ai remember <内容> - 保存个人长期记忆\n"
-        "/ai memories - 查看个人长期记忆\n"
-        "/ai forget - 清空个人长期记忆\n"
+        "/剧场 clear - 清空当前会话\n"
+        "/剧场 personality <ID> - 切换人格\n"
+        "/剧场 remember <内容> - 保存个人长期记忆\n"
+        "/剧场 memories - 查看个人长期记忆\n"
+        "/剧场 forget - 清空个人长期记忆\n"
         "当前接口：由中央 AI 模块管理\n"
         f"当前人格：{personality['name'] if personality else '未配置'}\n"
         f"可用人格：{personalities}",
@@ -368,7 +368,7 @@ async def help_command(event, _match) -> None:
 
 
 @handler(
-    r"^/(?:ai|陪伴)\s+(?:clear|清空)$",
+    r"^/(?:剧场|theater)\s+(?:clear|清空)$",
     name="清空 AI 上下文",
     desc="清空当前用户的独立上下文",
     priority=40,
@@ -382,7 +382,7 @@ async def clear_command(event, _match) -> None:
 
 
 @handler(
-    r"^/(?:ai|陪伴)\s+(?:personality|人格)\s+([\w-]+)$",
+    r"^/(?:剧场|theater)\s+(?:personality|人格)\s+([\w-]+)$",
     name="切换 AI 人格",
     desc="切换当前会话的 AI 人格",
     priority=40,
@@ -396,7 +396,7 @@ async def personality_command(event, match) -> None:
     current = config.load()
     personality = current["personalities"].get(personality_id)
     if personality is None:
-        await _reply_to_user(event, "人格不存在。发送 /ai 查看可用人格。")
+        await _reply_to_user(event, "人格不存在。发送 /剧场 查看可用人格。")
         return
     await asyncio.to_thread(
         store.set_personality, user_context_scope(event), personality_id
@@ -405,7 +405,7 @@ async def personality_command(event, match) -> None:
 
 
 @handler(
-    r"^/(?:ai|陪伴)\s+(?:remember|记住)\s+([\s\S]+)$",
+    r"^/(?:剧场|theater)\s+(?:remember|记住)\s+([\s\S]+)$",
     name="保存 AI 长期记忆",
     desc="保存当前用户明确指定的长期记忆",
     priority=40,
@@ -437,7 +437,7 @@ async def remember_command(event, match) -> None:
 
 
 @handler(
-    r"^/(?:ai|陪伴)\s+(?:memories|记忆)$",
+    r"^/(?:剧场|theater)\s+(?:memories|记忆)$",
     name="查看 AI 长期记忆",
     desc="查看当前用户保存的长期记忆",
     priority=40,
@@ -456,7 +456,7 @@ async def memories_command(event, _match) -> None:
 
 
 @handler(
-    r"^/(?:ai|陪伴)\s+(?:forget|忘记)$",
+    r"^/(?:剧场|theater)\s+(?:forget|忘记)$",
     name="清空 AI 长期记忆",
     desc="清空当前用户保存的长期记忆",
     priority=40,

@@ -1,6 +1,6 @@
 """四阶段串行叙事引擎 + 投递 + 自动推进调度。
 
-把 HDS Interlude 的 ``src/service.ts`` 核心编排移植到 ElainaBot 的 AI 聊天陪伴插件内。
+把 HDS Interlude 的 ``src/service.ts`` 核心编排移植到 ElainaBot 的 AI 幕间剧场插件内。
 职责边界：
 
 - 故事/参与者生命周期（对应 ``interlude_story`` / ``interlude_participant``）。
