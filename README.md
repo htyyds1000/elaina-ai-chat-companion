@@ -21,6 +21,7 @@ ElainaBot v2 聊天陪伴插件，提供猫娘、温柔伙伴、傲娇少女、�
 - 可配置违规词，输入拦截、输出替换，违规原文不会进入上下文
 - Web 面板管理聊天模型、生图旁路、人格、Skills、触发方式及上下文
 - 群聊默认需要 @ 机器人，可在面板开启自动回复
+- 内置「持续叙事（幕间模式）」高级玩法：主角中心的生命剧本、四阶段推进、记忆分层、情绪偏移、行动窗口与日程预规划
 
 ## 命令
 
@@ -30,8 +31,42 @@ ElainaBot v2 聊天陪伴插件，提供猫娘、温柔伙伴、傲娇少女、�
 - `/ai remember <内容>`：保存个人长期记忆
 - `/ai memories`：查看个人长期记忆
 - `/ai forget`：清空个人长期记忆
+- `/幕间`：查看持续叙事（幕间模式）状态
+- `/幕间 on`：开启幕间模式
+- `/幕间 off`：关闭幕间模式
+- `/幕间 reset`：重置当前用户的幕间故事
 
 先从模块市场安装并启用 `ai_llm` 服务模块，在该模块统一配置接口、API Key、模型目录和模型工具。聊天模型和生图旁路均只能从中央目录选择；生图旁路按后台列表从上到下尝试 `/images/generations`，失败后继续切换模型或接口。头像 meme 和 base64 生图结果需要 `image_hosting` 的 COS 图床。
+
+## 持续叙事（幕间模式）
+
+把聊天陪伴升级为带主线、情绪与日程的长期生命剧本。开启后，机器人不再只做回合式应答，而是围绕主角持续推演一段有延续性的生活叙事。
+
+### 核心机制
+
+- **主角中心生命剧本**：叙事重心始终在主角及其展开的生活，其余参与者按剧情需要出现。
+- **四阶段串行推进**：`user-message` → `conversation-follow-up` → `intent-due` → `advance` 依次流转，同一主角的回合串行执行、互不交错。
+- **自动推进与剧情余波**：空闲超过 `advance_idle_minutes` 后，按 `advance_interval_seconds` 间隔自动推进剧情。
+- **记忆分层**：Canon（主线设定）、活跃场景、长期事实、Overlay 等分层持久化，与普通聊天上下文隔离。
+- **Alter System 情绪偏移**：累积每条叙事的情绪偏移，动态计算触发阈值，达到阈值后重置并写入情绪侧写。
+- **Agency Window 行动窗口**：评估主体的外部行动能力（忙碌程度 / 隐私 / 设备可用性），决定是否主动联系他人。
+- **Schedule Preplan 日程预规划**：周期性日程（regimes）+ 例外日期（exceptions），物化未来 N 天日程并投影进提示词。
+
+所有模型角色（主叙事、上下文压缩、Alter 情绪侧写等）均通过中央 AI LLM 调用，不单独配置密钥。
+
+### 配置
+
+在 Web 面板「幕间模式」页签统一配置，也可在聊天内发送 `/幕间 on` 快速开启。主要开关与参数：
+
+- `enabled` / `timezone`：开关与时区（默认 `Asia/Shanghai`）
+- `provider_id` / `model_preference`：主叙事与压缩使用的中央接口与模型（留空复用插件默认）
+- `main_prompt` / `format_prompt` / `fixed_prompt` / `base_style_prompt` / `story_style_prompt`：可编辑提示词段
+- `perspective_enabled`：是否启用视角约束
+- `compaction_enabled` / `compaction_on_turn`：上下文压缩开关与时机
+- `advance_idle_minutes` / `advance_interval_seconds`：自动推进的空闲阈值与间隔
+- `alter_system`：情绪偏移子系统（`baseThreshold`、`densityFactor` 等）
+- `agency_window`：行动窗口子系统（`maxWindowMinutes`、`minimumProactiveIntervalMinutes` 等）
+- `schedule_preplan`：日程预规划子系统（`horizonDays`、`variationLevel` 等）
 
 ## 使用模型工具
 
